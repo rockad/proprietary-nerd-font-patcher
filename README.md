@@ -2,12 +2,16 @@
 
 A robust, reproducible Nerd Fonts generator for Microsoft Consolas, providing both **Standard** (proportional 2-cell icons) and **Mono** (strict 1-cell icons) variants without descender clipping, line height distortion, or cell aspect crushing.
 
+> [!IMPORTANT]
+> **Prerequisite — User-Supplied Font Required**: This repository does **NOT** bundle, host, or distribute Microsoft Consolas font files due to Microsoft and Monotype commercial licensing restrictions. You must provide your own legally acquired Consolas TrueType files (`Consolas.ttf`, `Consolas-Bold.ttf`, `Consolas-Italic.ttf`, `Consolas-BoldItalic.ttf`) by placing them into the `in/` directory before running the patcher. Sources include your local Windows system (`C:\Windows\Fonts\consola*.ttf`), Microsoft Office, or an authorized commercial purchase (e.g. MyFonts / Monotype).
+
 ---
 
 ## Table of Contents
 
 - [Overview & Variants](#overview--variants)
   - [Standard vs Mono Comparison](#standard-vs-mono-comparison)
+- [Using with Other Proprietary Fonts (SF Mono, Berkeley Mono, Menlo, etc.)](#using-with-other-proprietary-fonts-sf-mono-berkeley-mono-menlo-etc)
 - [Why Previous Consolas Patches Failed: Technical Root Causes](#why-previous-consolas-patches-failed-technical-root-causes)
   - [1. `--adjust-line-height` Table Mutation & Descender Clipping](#1---adjust-line-height-table-mutation--descender-clipping)
   - [2. Cell Aspect Ratio & Wide Glyph Squishing under `--mono`](#2-cell-aspect-ratio--wide-glyph-squishing-under---mono)
@@ -48,6 +52,16 @@ Two distinct font variants are built into separate output directories:
 
 > [!TIP]
 > **Recommendation**: Always prefer **Consolas Nerd Font** (Standard variant) for modern workflows (Windows Terminal, VS Code, Ghostty, WezTerm). Modern terminals natively support 2-cell wide Unicode glyphs, rendering file icons, git branches, and devicon logos without distortion.
+
+---
+
+## Using with Other Proprietary Fonts (SF Mono, Berkeley Mono, Menlo, etc.)
+
+While this repository is named and optimized for **Consolas**, the containerized patcher pipeline and zero-patch fallback guide are completely font-agnostic:
+
+- **Universal Input**: Drop any proprietary or custom TrueType (`.ttf`) or OpenType (`.otf`) font files into the `in/` directory (e.g., Apple SF Mono, Berkeley Mono, PragmataPro, Dank Mono, Menlo, Aptos Mono, or Cascadia Code).
+- **Automatic Multi-Font Detection**: `patcher.sh` scans `in/` and patches every font file found, automatically creating matching entries under `out/standard/` and `out/mono/`.
+- **Identical Metric Protection**: The exact same metric rules apply across all proprietary commercial typefaces—omitting `--adjust-line-height` prevents ruining custom line gaps and baselines designed by professional type foundries.
 
 ---
 
