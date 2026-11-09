@@ -31,6 +31,7 @@ A robust, reproducible Nerd Fonts generator for Microsoft Consolas, providing bo
   - [Running the Patcher](#running-the-patcher)
 - [Directory Layout](#directory-layout)
 - [Licensing](#licensing)
+- [Credits & Acknowledgments](#credits--acknowledgments)
 
 ---
 
@@ -281,5 +282,16 @@ The script will automatically:
 ## Licensing
 
 - **Microsoft Consolas**: Proprietary font software owned by Microsoft Corporation. All rights reserved. Source font binaries and generated derivatives are excluded from version control via `.gitignore`.
-- **Nerd Fonts**: Licensed under MIT (scripts & glyphs). Individual upstream glyphs retain their original licenses (Font Awesome, Material Design, Octicons, etc.).
+- **Nerd Fonts**: Licensed under MIT (scripts & glyphs). Individual upstream glyph sets retain their respective licenses (Font Awesome, Material Design, Octicons, etc.).
 - **Build Scripts & Configuration**: MIT License.
+
+---
+
+## Credits & Acknowledgments
+
+This project is built upon the foundational work of the following typographers, engineers, and open-source projects:
+
+- **[Ryan L McIntyre](https://github.com/ryanoasis) & [Nerd Fonts](https://www.nerdfonts.com/)** — For creating the iconic [Nerd Fonts](https://github.com/ryanoasis/nerd-fonts) ecosystem, curated glyph aggregates, and the automated `font-patcher` toolchain.
+- **[Luc(as) de Groot](https://fontfabrik.com/) & [Microsoft Corporation](https://www.microsoft.com/)** — For designing the legendary Consolas typeface, finely tuned ClearType rasterization parameters, and enduring programming ergonomics.
+- **[George Williams](https://fontforge.org/) & the [FontForge](https://github.com/fontforge/fontforge) Team** — For the open-source font editor and outline transformation engine that powers automated glyph injection.
+- **[Docker](https://www.docker.com/)** — For enabling completely reproducible, isolated containerized font compilation environments across any operating system.
