@@ -1,0 +1,14 @@
+# Source assets and archives (proprietary commercial)
+in/*
+!in/.gitkeep
+
+# Generated fonts (reproducible artifacts)
+out/**/*.ttf
+out/**/*.otf
+out/*.ttf
+*.zip
+
+# Preserve directory structure
+!out/.gitkeep
+!out/standard/.gitkeep
+!out/mono/.gitkeep
