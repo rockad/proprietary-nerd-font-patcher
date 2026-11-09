@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Consolas Nerd Font Patcher Runner
-# Patches Consolas with Nerd Fonts glyphs using the official Docker patcher image.
+# Proprietary Nerd Font Patcher Runner
+# Patches Consolas, SF Mono, Berkeley Mono, and other proprietary fonts with Nerd Fonts glyphs using Docker.
 # Supported targets: standard | mono | all (default: all)
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -27,7 +27,7 @@ fi
 FONT_COUNT=$(find "$SCRIPT_DIR/in" -maxdepth 1 \( -iname '*.ttf' -o -iname '*.otf' \) | wc -l)
 if [ "$FONT_COUNT" -eq 0 ]; then
   echo "Error: No .ttf or .otf source fonts found in $SCRIPT_DIR/in" >&2
-  echo "Please place Consolas font files into $SCRIPT_DIR/in/ before patching." >&2
+  echo "Please place .ttf or .otf font files (e.g. Consolas, SF Mono, Berkeley Mono) into $SCRIPT_DIR/in/ before patching." >&2
   exit 1
 fi
 

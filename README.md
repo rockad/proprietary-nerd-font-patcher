@@ -1,21 +1,39 @@
-# Consolas Nerd Font
+# Proprietary Nerd Font Patcher
 
-A robust, reproducible Nerd Fonts generator for Microsoft Consolas, providing both **Standard** (proportional 2-cell icons) and **Mono** (strict 1-cell icons) variants without descender clipping, line height distortion, or cell aspect crushing.
+A robust, containerized Nerd Fonts patching pipeline and zero-patch fallback guide for proprietary, commercial, and unredistributable programming fonts.
+
+Built for typefaces that cannot be redistributed in pre-patched form due to licensing—including **Microsoft Consolas**, **Apple SF Mono**, **Berkeley Mono**, **PragmataPro**, **Dank Mono**, **Menlo**, and **Aptos Mono**.
 
 > [!IMPORTANT]
-> **Prerequisite — User-Supplied Font Required**: This repository does **NOT** bundle, host, or distribute Microsoft Consolas font files due to Microsoft and Monotype commercial licensing restrictions. You must provide your own legally acquired Consolas TrueType files (`Consolas.ttf`, `Consolas-Bold.ttf`, `Consolas-Italic.ttf`, `Consolas-BoldItalic.ttf`) by placing them into the `in/` directory before running the patcher. Sources include your local Windows system (`C:\Windows\Fonts\consola*.ttf`), Microsoft Office, or an authorized commercial purchase (e.g. MyFonts / Monotype).
+> **Prerequisite — User-Supplied Font Required**: This repository does **NOT** bundle, host, or distribute proprietary font binaries due to commercial licensing restrictions. You must provide your own legally acquired font files (`.ttf` or `.otf`) by placing them into the `in/` directory before running the patcher.
+
+---
+
+## Featured Showcase: Consolas Nerd Font
+
+While this tool supports any proprietary monospace font, **Microsoft Consolas** serves as the primary showcase and reference implementation. 
+
+Consolas is one of the most widely deployed developer fonts in the world, yet community attempts to patch it frequently fail due to:
+- **Descender clipping**: Cutting off the bottoms of `g`, `j`, `p`, `q`, `y`, and underscores `_`.
+- **Line height distortion**: Unnatural vertical spacing or squashed row padding.
+- **Icon squishing**: Shrunken, illegible glyphs under naive `--mono` settings.
+- **ClearType blurriness**: Degradation of native Microsoft TrueType bytecode hinting (`fpgm`, `prep`, `cvt ` tables).
+
+This repository provides the definitive fix for **Consolas Nerd Font**, preserving native ClearType rasterization metrics, offering both **Standard** (2-cell proportional icons) and **Mono** (1-cell icons) variants, and detailing zero-patch terminal fallback chains.
 
 ---
 
 ## Table of Contents
 
+- [Supported Fonts & Universal Input](#supported-fonts--universal-input)
 - [Overview & Variants](#overview--variants)
   - [Standard vs Mono Comparison](#standard-vs-mono-comparison)
-- [Using with Other Proprietary Fonts (SF Mono, Berkeley Mono, Menlo, etc.)](#using-with-other-proprietary-fonts-sf-mono-berkeley-mono-menlo-etc)
-- [Why Previous Consolas Patches Failed: Technical Root Causes](#why-previous-consolas-patches-failed-technical-root-causes)
+- [Consolas Showcase: Why Previous Patches Failed](#consolas-showcase-why-previous-patches-failed)
   - [1. `--adjust-line-height` Table Mutation & Descender Clipping](#1---adjust-line-height-table-mutation--descender-clipping)
   - [2. Cell Aspect Ratio & Wide Glyph Squishing under `--mono`](#2-cell-aspect-ratio--wide-glyph-squishing-under---mono)
   - [3. FontForge ClearType Bytecode Hinting Invalidation](#3-fontforge-cleartype-bytecode-hinting-invalidation)
+- [Quick Start: Patching Consolas Step-by-Step](#quick-start-patching-consolas-step-by-step)
+- [Using with Other Proprietary Fonts (SF Mono, Berkeley Mono, Menlo, etc.)](#using-with-other-proprietary-fonts-sf-mono-berkeley-mono-menlo-etc)
 - [Manual Font Installation](#manual-font-installation)
   - [Windows 10 / 11](#windows-10--11)
   - [Linux & WSL](#linux--wsl)
@@ -35,66 +53,106 @@ A robust, reproducible Nerd Fonts generator for Microsoft Consolas, providing bo
 
 ---
 
+## Supported Fonts & Universal Input
+
+The patching pipeline automatically processes any TrueType (`.ttf`) or OpenType (`.otf`) fonts placed in the `in/` directory:
+
+| Font Family | Typical Source | Format |
+| :--- | :--- | :--- |
+| **Microsoft Consolas** | Windows (`C:\Windows\Fonts\consola*.ttf`), Office, or MyFonts | `.ttf` |
+| **Apple SF Mono** | macOS (`/System/Applications/Utilities/Terminal.app/...`) or Xcode | `.otf` |
+| **Berkeley Mono** | US Graphics commercial license | `.ttf` / `.otf` |
+| **PragmataPro** | Fabrizio Schiavi commercial license | `.ttf` |
+| **Dank Mono** | Phil Plückthun commercial license | `.otf` |
+| **Menlo** | macOS system font (`/System/Library/Fonts/`) | `.ttf` |
+| **Microsoft Aptos Mono** | Microsoft 365 / Windows 11 font update | `.ttf` |
+
+---
+
 ## Overview & Variants
 
-Microsoft Consolas is a monospace typeface designed by Luc(as) de Groot for Microsoft ClearType. Due to proprietary licensing, pre-patched binaries cannot be redistributed publicly. This repository provides a turnkey Docker-based pipeline to patch your licensed Consolas source files using official Nerd Fonts tooling.
-
-Two distinct font variants are built into separate output directories:
+When patching programming fonts, icon width is a critical architectural choice:
 
 ### Standard vs Mono Comparison
 
-| Feature | Consolas Nerd Font (`out/standard/`) | Consolas Nerd Font Mono (`out/mono/`) |
+| Feature | Standard Variant (`out/standard/`) | Mono Variant (`out/mono/`) |
 | :--- | :--- | :--- |
-| **Family Name** | `Consolas Nerd Font` | `Consolas Nerd Font Mono` |
+| **Naming Convention** | `<FontName> Nerd Font` (e.g. `Consolas Nerd Font`) | `<FontName> Nerd Font Mono` (e.g. `Consolas Nerd Font Mono`) |
 | **Symbol Cell Width** | **2-cell (proportional / double-width)** | **1-cell (strict monospaced / single-width)** |
 | **Icon Clarity** | Crisp, uncompressed, proportional glyphs | Compressed/narrowed to fit strict 1-column em |
 | **Recommended For** | Modern terminals, IDEs, code editors | Legacy CLI environments, strict 1-cell grids |
 | **Target Terminals** | Windows Terminal, VS Code, Ghostty, WezTerm, Kitty | Windows Console (`conhost`), tmux without wide-char support |
 
 > [!TIP]
-> **Recommendation**: Always prefer **Consolas Nerd Font** (Standard variant) for modern workflows (Windows Terminal, VS Code, Ghostty, WezTerm). Modern terminals natively support 2-cell wide Unicode glyphs, rendering file icons, git branches, and devicon logos without distortion.
+> **Recommendation**: Always prefer the **Standard** variant for modern workflows. Modern terminals natively support 2-cell wide Unicode glyphs, rendering file icons, git branches, and devicon logos with proper proportions.
 
 ---
 
-## Using with Other Proprietary Fonts (SF Mono, Berkeley Mono, Menlo, etc.)
+## Consolas Showcase: Why Previous Patches Failed
 
-While this repository is named and optimized for **Consolas**, the containerized patcher pipeline and zero-patch fallback guide are completely font-agnostic:
-
-- **Universal Input**: Drop any proprietary or custom TrueType (`.ttf`) or OpenType (`.otf`) font files into the `in/` directory (e.g., Apple SF Mono, Berkeley Mono, PragmataPro, Dank Mono, Menlo, Aptos Mono, or Cascadia Code).
-- **Automatic Multi-Font Detection**: `patcher.sh` scans `in/` and patches every font file found, automatically creating matching entries under `out/standard/` and `out/mono/`.
-- **Identical Metric Protection**: The exact same metric rules apply across all proprietary commercial typefaces—omitting `--adjust-line-height` prevents ruining custom line gaps and baselines designed by professional type foundries.
-
----
-
-## Why Previous Consolas Patches Failed: Technical Root Causes
-
-Many community-patched Consolas builds suffer from broken descenders (clipping `g`, `j`, `p`, `q`, `y`, `_`), squished glyphs, or fuzzy rendering. Here is the technical breakdown of why those failures occur:
+Consolas has a character advance width of approximately **55% em** (550 units per 1000-unit em) and finely balanced vertical metrics. When patched with default Nerd Fonts scripts, several severe issues arise:
 
 ### 1. `--adjust-line-height` Table Mutation & Descender Clipping
 
-When `font-patcher` is invoked with the `--adjust-line-height` (`-l`) flag, it recalculates vertical metrics across three distinct font tables:
+When `font-patcher` is invoked with `--adjust-line-height` (`-l`), it recalculates vertical metrics across three distinct tables:
 - `OS/2`: `sTypoAscender`, `sTypoDescender`, `sTypoLineGap`, `usWinAscent`, `usWinDescent`
 - `hhea`: `ascender`, `descender`, `lineGap`
 - `VDMX`: Pre-computed vertical device metrics
 
-In Microsoft Consolas:
+In Consolas:
 - Consolas uses a custom `usWinDescent` and `sTypoDescender` ratio tuned specifically for ClearType subpixel rendering.
 - `--adjust-line-height` attempts to center Powerline chevron arrows by shifting baseline and shrinking vertical descent metrics.
 - As a consequence, character descenders (`g`, `j`, `p`, `y`, and underscores `_`) exceed the bounding box reported in `usWinDescent` and get ruthlessly clipped by terminal renderers (especially Windows Terminal and DirectWrite).
-- **The Solution**: Omitting `--adjust-line-height` leaves Consolas' native metrics untouched, preserving perfect descenders and exact line-height spacing.
+- **The Fix**: Omitting `--adjust-line-height` leaves Consolas' native metrics untouched, preserving perfect descenders and exact line-height spacing.
 
 ### 2. Cell Aspect Ratio & Wide Glyph Squishing under `--mono`
 
-- Consolas is an unusually narrow monospace font: its advance width is approximately **55% em** (550 units per 1000-unit em).
-- Nerd Fonts symbol sets (Font Awesome, Material Design Icons, Octicons) are natively authored on a 1000x1000 square grid (100% em).
-- When `--mono` is passed, the patcher scales all 2-cell and square icons down to 1-cell width (550 units). This causes horizontal compression of ~45%, rendering intricate icons (like Docker whale, Rust crab, Angular shield) unreadable.
-- **The Solution**: The Standard variant allows icons to occupy 2 monospace cells (1100 units), preserving their natural aspect ratio while aligning precisely on terminal character grids.
+- Consolas is an unusually narrow monospace font (advance width ~550 units).
+- Nerd Fonts symbol sets (Font Awesome, Material Design Icons, Octicons) are natively authored on a 1000x1000 square grid.
+- When `--mono` is passed, the patcher scales all icons down to fit a single 550-unit cell. This causes horizontal compression of ~45%, rendering intricate icons (Docker whale, Rust crab, Angular shield) unreadable.
+- **The Fix**: The Standard variant allows icons to occupy 2 monospace cells (1100 units), preserving their natural aspect ratio while aligning precisely on terminal character grids.
 
 ### 3. FontForge ClearType Bytecode Hinting Invalidation
 
 - Original Microsoft Consolas features complex TrueType bytecode hinting (`fpgm`, `prep`, `cvt ` tables) designed specifically for Microsoft's ClearType rasterizer.
 - When FontForge regenerates TrueType tables during patching, re-hinting or modifying existing glyph tables can corrupt bytecode streams, leading to blurred stems at standard DPI.
-- **The Solution**: By using `--careful`, existing native Consolas glyphs and their TrueType instructions are preserved without re-encoding, ensuring that ASCII rendering remains 100% identical to the stock font.
+- **The Fix**: By passing `--careful`, existing native glyphs and their TrueType instructions are preserved without re-encoding, ensuring that ASCII text rendering remains 100% identical to the stock font.
+
+---
+
+## Quick Start: Patching Consolas Step-by-Step
+
+### 1. Obtain Your Consolas Files
+Copy your licensed Consolas `.ttf` files into the `in/` directory:
+- **From Windows:** Copy `C:\Windows\Fonts\consola*.ttf` into `in/`
+- **From WSL:**
+  ```bash
+  cp /mnt/c/Windows/Fonts/consola*.ttf in/
+  ```
+- **From MyFonts / Monotype Purchase:** Unpack your order and copy `Consolas*.ttf` into `in/`
+
+### 2. Run the Patcher
+```bash
+# Build both Standard (2-cell) and Mono (1-cell) variants
+./patcher.sh all
+
+# Or build only the recommended Standard variant
+./patcher.sh standard
+```
+
+### 3. Install the Fonts
+- Windows: Select all `.ttf` files in `out/standard/`, right-click, and select **Install**.
+- Linux / WSL: Copy to `~/.local/share/fonts/` and run `fc-cache -fv`.
+
+---
+
+## Using with Other Proprietary Fonts (SF Mono, Berkeley Mono, Menlo, etc.)
+
+The patcher pipeline works identically for any proprietary monospace font:
+
+1. **Clear `in/` and add your target fonts**: Drop your `.ttf` or `.otf` files into `in/` (e.g. `SF-Mono-Regular.otf`, `BerkeleyMono-Regular.ttf`).
+2. **Run `./patcher.sh all`**: The script automatically detects the font format, applies multi-threaded containerized patching with metric preservation, and outputs into `out/standard/` and `out/mono/`.
+3. **Enjoy intact metrics**: The omission of `--adjust-line-height` guarantees that your font's custom vertical metrics, descenders, and typography are preserved.
 
 ---
 
@@ -107,25 +165,24 @@ After running `./patcher.sh`, install the generated `.ttf` files manually.
 1. Open File Explorer and navigate to:
    - For Standard: `out\standard\`
    - For Mono: `out\mono\`
-2. Select all four `.ttf` files (`Regular`, `Bold`, `Italic`, `BoldItalic`).
-3. Right-click and select **Install** (or **Install for all users** if you have administrative privileges).
-   - Alternatively, drag and drop the files into Windows Settings: `Settings > Personalization > Fonts`.
-4. If your terminal or editor is open, restart it to load the newly registered font family.
+2. Select all generated `.ttf` files.
+3. Right-click and select **Install** (or **Install for all users**).
+4. Restart your terminal emulator or code editor.
 
 ### Linux & WSL
 
 1. Copy the desired font files to your user fonts directory:
    ```bash
-   mkdir -p ~/.local/share/fonts/consolas-nerd-font
-   cp out/standard/*.ttf ~/.local/share/fonts/consolas-nerd-font/
+   mkdir -p ~/.local/share/fonts/nerd-fonts
+   cp out/standard/*.ttf ~/.local/share/fonts/nerd-fonts/
    ```
 2. Rebuild the font cache:
    ```bash
-   fc-cache -fv ~/.local/share/fonts/consolas-nerd-font/
+   fc-cache -fv ~/.local/share/fonts/nerd-fonts/
    ```
 3. Verify font registration:
    ```bash
-   fc-list : family | grep -i "Consolas Nerd Font"
+   fc-list : family | grep -i "Nerd Font"
    ```
 
 ### macOS
@@ -140,7 +197,7 @@ After running `./patcher.sh`, install the generated `.ttf` files manually.
 
 ## Zero-Patch Fallback Guide (Fallback to Symbols Nerd Font)
 
-If you prefer to keep your original, unpatched Microsoft Consolas font intact and avoid font patching altogether, you can use **font fallback chaining**. Modern terminal emulators and editors seamlessly render ASCII characters using standard Consolas, while delegating missing Unicode icon codepoints to **Symbols Nerd Font**.
+If you prefer to keep your original, unpatched font files 100% untouched and avoid font patching altogether, use **font fallback chaining**. Modern terminal emulators and editors seamlessly render ASCII characters using standard Consolas, while delegating missing Unicode icon codepoints to **Symbols Nerd Font**.
 
 ### 1. Download Symbols Nerd Font
 Download `SymbolsNerdFont-Regular.ttf` and `SymbolsNerdFontMono-Regular.ttf` from [Nerd Fonts Releases](https://github.com/ryanoasis/nerd-fonts/releases/latest) and install it on your OS.
@@ -153,49 +210,26 @@ Download `SymbolsNerdFont-Regular.ttf` and `SymbolsNerdFontMono-Regular.ttf` fro
   "profiles": {
     "defaults": {
       "font": {
-        "face": "Consolas",
-        "cellWidth": null,
-        "cellHeight": null
+        "face": "Consolas"
       }
     }
   }
 }
 ```
-*(Windows Terminal automatically cascades missing glyphs to `Symbols Nerd Font` when installed).*
-
-Or configure the patched font directly:
-```json
-{
-  "profiles": {
-    "defaults": {
-      "font": {
-        "face": "Consolas Nerd Font",
-        "size": 11.0
-      }
-    }
-  }
-}
-```
+*(Windows Terminal automatically resolves missing symbol glyphs from installed system fonts, including Symbols Nerd Font).*
 
 #### Visual Studio Code (`settings.json`)
 ```json
 {
-  "editor.fontFamily": "'Consolas', 'Symbols Nerd Font', monospace",
-  "terminal.integrated.fontFamily": "'Consolas Nerd Font', 'Consolas', monospace"
+  "editor.fontFamily": "Consolas, 'Symbols Nerd Font', monospace",
+  "terminal.integrated.fontFamily": "Consolas, 'Symbols Nerd Font Mono'"
 }
 ```
 
 #### Ghostty (`config`)
 ```ini
-font-family = "Consolas"
-font-family = "Symbols Nerd Font"
-font-size = 12
-adjust-cursor-height = 0
-```
-Or with patched font:
-```ini
-font-family = "Consolas Nerd Font"
-font-size = 12
+font-family = Consolas
+font-family = Symbols Nerd Font
 ```
 
 #### WezTerm (`wezterm.lua`)
@@ -204,24 +238,19 @@ local wezterm = require 'wezterm'
 local config = wezterm.config_builder()
 
 config.font = wezterm.font_with_fallback({
-  { family = 'Consolas', weight = 'Regular' },
-  { family = 'Symbols Nerd Font', weight = 'Regular' },
+  'Consolas',
+  'Symbols Nerd Font',
 })
-config.font_size = 11.5
 
 return config
 ```
 
 #### Kitty (`kitty.conf`)
-```ini
-font_family      Consolas
-bold_font        Consolas Bold
-italic_font      Consolas Italic
-bold_italic_font Consolas Bold Italic
-font_size 11.5
+```conf
+font_family Consolas
 
-# Nerd Fonts symbol fallback range
-symbol_map U+23FB-U+23FE,U+2665,U+26A1,U+2B58,U+E000-U+E00A,U+E0A0-U+E0A3,U+E0B0-U+E0D4,U+E200-U+E2A9,U+E300-U+E3E3,U+E5FA-U+E6B1,U+E700-U+E7C5,U+EA60-U+EBEB,U+F000-U+F2E0,U+F300-U+F32F,U+F400-U+F4A9,U+F500-U+F8FF,U+F0001-U+F1AF0 Symbols Nerd Font
+# Map Nerd Font Unicode ranges to Symbols Nerd Font
+symbol_map U+e000-U+e00a,U+ea60-U+ebeb,U+e0a0-U+e0c8,U+e0ca,U+e0cc-U+e0d4,U+e200-U+e2a9,U+e300-U+e3e3,U+e5fa-U+e6b1,U+e700-U+e7c5,U+f000-U+f2e9,U+f300-U+f372,U+f400-U+f532,U+f0001-U+f1af0 Symbols Nerd Font
 ```
 
 ---
@@ -229,25 +258,23 @@ symbol_map U+23FB-U+23FE,U+2665,U+26A1,U+2B58,U+E000-U+E00A,U+E0A0-U+E0A3,U+E0B0
 ## Building & Patching Instructions
 
 ### Prerequisites
-- Docker or Podman installed and running.
-- Licensed Consolas TrueType font files placed in `in/`:
-  - `Consolas.ttf` (Regular)
-  - `Consolas-Bold.ttf` (Bold)
-  - `Consolas-Italic.ttf` (Italic)
-  - `Consolas-BoldItalic.ttf` (Bold Italic)
+
+- **Docker**: Docker Engine or Docker Desktop installed and running.
+- **Source Fonts**: Your licensed `.ttf` or `.otf` font files placed in `in/`.
 
 ### Running the Patcher
 
-Run `patcher.sh` with your desired target:
-
 ```bash
-# Build both Standard and Mono variants (default)
+# Make patcher executable
+chmod +x patcher.sh
+
+# Build all variants (Standard 2-cell and Mono 1-cell)
 ./patcher.sh all
 
-# Build only the Standard variant (2-cell proportional icons)
+# Build only Standard variant (recommended)
 ./patcher.sh standard
 
-# Build only the Mono variant (1-cell strict monospaced icons)
+# Build only Mono variant
 ./patcher.sh mono
 ```
 
@@ -262,17 +289,15 @@ The script will automatically:
 ## Directory Layout
 
 ```text
-~/projects/consolas-nerd-font/
-├── .gitignore          # Git ignores font binaries (*.ttf, *.otf)
-├── in/                 # Source Consolas TrueType font files & licenses
-│   ├── Consolas.ttf
-│   ├── Consolas-Bold.ttf
-│   ├── Consolas-Italic.ttf
-│   ├── Consolas-BoldItalic.ttf
-│   └── Licenses/
+proprietary-nerd-font-patcher/
+├── .gitignore          # Git ignores font binaries (*.ttf, *.otf, *.zip)
+├── in/                 # Source proprietary font files (user-supplied)
+│   ├── .gitkeep
+│   └── (Consolas.ttf, SF-Mono.otf, etc. - gitignored)
 ├── out/
-│   ├── standard/       # Consolas Nerd Font (2-cell icons, recommended)
-│   └── mono/           # Consolas Nerd Font Mono (1-cell icons)
+│   ├── .gitkeep
+│   ├── standard/       # Standard variant (2-cell icons, recommended)
+│   └── mono/           # Mono variant (1-cell icons)
 ├── patcher.sh          # Multi-variant Docker patcher build script
 └── README.md           # Comprehensive technical documentation
 ```
@@ -281,7 +306,7 @@ The script will automatically:
 
 ## Licensing
 
-- **Microsoft Consolas**: Proprietary font software owned by Microsoft Corporation. All rights reserved. Source font binaries and generated derivatives are excluded from version control via `.gitignore`.
+- **Proprietary Fonts**: All rights belong to their respective copyright holders (Microsoft Corporation, Apple Inc., US Graphics, etc.). Source font binaries and generated derivatives are excluded from version control via `.gitignore`.
 - **Nerd Fonts**: Licensed under MIT (scripts & glyphs). Individual upstream glyph sets retain their respective licenses (Font Awesome, Material Design, Octicons, etc.).
 - **Build Scripts & Configuration**: MIT License.
 
